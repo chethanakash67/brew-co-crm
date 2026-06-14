@@ -2,10 +2,5 @@
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
-  "outputDirectory": ".next",
-  "env": {
-    "NEXT_PUBLIC_API_URL": {
-      "description": "URL of the deployed backend API (e.g. https://brew-co-backend.onrender.com)"
-    }
-  }
+  "outputDirectory": ".next"
 }

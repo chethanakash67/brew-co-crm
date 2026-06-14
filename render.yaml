@@ -38,7 +38,7 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: CRM_CALLBACK_URL
-        value: https://brew-co-backend.onrender.com/api/receipts/callback
+      - key: CRM_URL
+        value: https://brew-co-backend.onrender.com
       - key: PORT
         value: 3003
