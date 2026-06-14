@@ -1,4 +1,8 @@
+import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
+
+dotenv.config({ path: ".env" });
+dotenv.config({ path: "backend/.env" });
 
 const prisma = new PrismaClient();
 
@@ -67,18 +71,22 @@ function buildTier(index: number): string {
   return "bronze";
 }
 
-async function main() {
+async function seedDemoData() {
   await prisma.receipt.deleteMany();
   await prisma.communication.deleteMany();
   await prisma.campaign.deleteMany();
   await prisma.segment.deleteMany();
   await prisma.order.deleteMany();
   await prisma.customer.deleteMany();
-  await prisma.store.deleteMany();
 
-  const defaultStore = await prisma.store.create({
-    data: { name: "Brew & Co." }
-  });
+  const defaultStore =
+    (await prisma.store.findFirst({
+      where: { name: { equals: "Brew & Co.", mode: "insensitive" } },
+      orderBy: { createdAt: "asc" }
+    })) ??
+    (await prisma.store.create({
+      data: { name: "Brew & Co." }
+    }));
 
   const customers = Array.from({ length: 500 }, (_, index) => {
     const firstName = randomFrom(firstNames);
@@ -166,6 +174,20 @@ async function main() {
   });
 
   console.log("Seeded 500 customers, 3000 orders, and 3 starter segments for Brew & Co.");
+}
+
+async function main() {
+  const seedIfEmpty = process.argv.includes("--if-empty");
+
+  if (seedIfEmpty) {
+    const existingCustomers = await prisma.customer.count();
+    if (existingCustomers > 0) {
+      console.log(`Skipped demo seed because ${existingCustomers} customers already exist.`);
+      return;
+    }
+  }
+
+  await seedDemoData();
 }
 
 main()

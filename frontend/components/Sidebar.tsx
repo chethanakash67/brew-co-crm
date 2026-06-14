@@ -42,6 +42,9 @@ export function Sidebar() {
         } else if (data.length > 0) {
           setActiveStoreId(data[0].id);
           localStorage.setItem("activeStoreId", data[0].id);
+          if (savedId) {
+            window.location.reload();
+          }
         }
       })
       .catch(err => console.error("Failed to load stores:", err))

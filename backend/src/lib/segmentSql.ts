@@ -10,6 +10,18 @@ function assertSafeStoreId(storeId: string): void {
 
 const forbiddenTokens = /\b(insert|update|delete|drop|alter|truncate|create|grant|revoke|copy|execute|call|merge)\b/i;
 
+function toPhysicalSegmentSql(sql: string): string {
+  return sql
+    .replace(/\bc\.totalSpend\b/g, "c.totalspend")
+    .replace(/\bc\.createdAt\b/g, "c.createdat")
+    .replace(/\bo\.customerId\b/g, "o.customerid")
+    .replace(/\bo\.orderedAt\b/g, "o.orderedat")
+    .replace(/\bcustomerId\b/g, "customerid")
+    .replace(/\borderedAt\b/g, "orderedat")
+    .replace(/\btotalSpend\b/g, "totalspend")
+    .replace(/\bcreatedAt\b/g, "createdat");
+}
+
 export function cleanSegmentSql(sql: string): string {
   return sql
     .replace(/```sql/gi, "")
@@ -63,11 +75,12 @@ function normalizeCustomer(row: Record<string, unknown>): SegmentCustomer {
 
 export async function runSegmentSql(sql: string, limit?: number, storeId?: string): Promise<SegmentCustomer[]> {
   const safeSql = assertSafeSegmentSql(sql);
-  let finalSql = safeSql;
+  const executableSql = toPhysicalSegmentSql(safeSql);
+  let finalSql = executableSql;
   if (storeId) {
     assertSafeStoreId(storeId);
     finalSql = `SELECT DISTINCT main_c.id, main_c.name, main_c.email, main_c.phone, main_c.city, main_c.tier, main_c.totalspend AS "totalSpend"
-                FROM (${safeSql}) sub_c
+                FROM (${executableSql}) sub_c
                 JOIN customers main_c ON sub_c.id = main_c.id
                 WHERE main_c.storeid = '${storeId}'`;
   }
@@ -78,11 +91,12 @@ export async function runSegmentSql(sql: string, limit?: number, storeId?: strin
 
 export async function countSegmentSql(sql: string, storeId?: string): Promise<number> {
   const safeSql = assertSafeSegmentSql(sql);
-  let finalSql = safeSql;
+  const executableSql = toPhysicalSegmentSql(safeSql);
+  let finalSql = executableSql;
   if (storeId) {
     assertSafeStoreId(storeId);
     finalSql = `SELECT DISTINCT main_c.id
-                FROM (${safeSql}) sub_c
+                FROM (${executableSql}) sub_c
                 JOIN customers main_c ON sub_c.id = main_c.id
                 WHERE main_c.storeid = '${storeId}'`;
   }

@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "prisma generate && tsc",
-    "prestart": "prisma migrate deploy",
+    "prestart": "prisma migrate deploy && npm run seed:if-empty",
     "start": "node dist/src/index.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "seed": "tsx prisma/seed.ts",
+    "seed:if-empty": "node dist/prisma/seed.js --if-empty",
     "test:safety": "tsx src/test-safety.ts",
     "test": "vitest run"
   },
