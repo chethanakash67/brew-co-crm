@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: brew_co_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: brew_co_crm
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d brew_co_crm"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: brew_co_backend
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/brew_co_crm?schema=public
+      CHANNEL_STUB_URL: http://channel-stub:3003
+      FRONTEND_URL: http://localhost:3000
+      PORT: 8000
+    command: >
+      sh -c "npx prisma migrate deploy && npx prisma db seed && npm start"
+
+  channel-stub:
+    build:
+      context: ./channel-stub
+      dockerfile: Dockerfile
+    container_name: brew_co_channel_stub
+    restart: always
+    ports:
+      - "3003:3003"
+    environment:
+      CRM_URL: http://backend:8000
+      PORT: 3003
+      DELIVERY_MODE: simulate
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    container_name: brew_co_frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_data:

@@ -1,0 +1,174 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: #120803;
+  color: #ffe9d5;
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+/* App atmosphere */
+.site-atmosphere {
+  position: relative;
+}
+
+.site-atmosphere::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 8% 9%, rgba(255, 200, 148, 0.08), transparent 34%),
+    radial-gradient(circle at 90% 16%, rgba(130, 74, 36, 0.1), transparent 38%),
+    radial-gradient(circle at 50% 80%, rgba(255, 180, 120, 0.05), transparent 45%);
+}
+
+/* Glass section shell */
+.section-shell-glass {
+  background: linear-gradient(
+    145deg,
+    rgba(250, 222, 192, 0.06),
+    rgba(18, 8, 4, 0.2)
+  );
+  border: 1px solid rgba(255, 240, 225, 0.1);
+  backdrop-filter: blur(18px);
+  border-radius: 20px;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 209, 174, 0.18);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 209, 174, 0.3);
+}
+
+/* Recharts dark tooltip override */
+.recharts-default-tooltip {
+  background: #1a0d08 !important;
+  border: 1px solid rgba(255, 240, 225, 0.15) !important;
+  border-radius: 12px !important;
+  color: #ffe9d5 !important;
+}
+
+.recharts-tooltip-label {
+  color: #ffd1ae !important;
+}
+
+/* CRM surface effects */
+.surface-shine {
+  pointer-events: none;
+  position: absolute;
+  inset: -20% auto -20% -55%;
+  width: 42%;
+  background: linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 237, 209, 0.4) 48%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-18deg);
+  animation: surface-shine 4.2s ease-in-out infinite;
+}
+
+@keyframes surface-shine {
+  0% { left: -55%; opacity: 0; }
+  15% { opacity: 0.85; }
+  45% { left: 120%; opacity: 0; }
+  100% { left: 120%; opacity: 0; }
+}
+
+/* Sparkle ring border (rotating conic-gradient) */
+.sparkle-outline {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.sparkle-outline::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 9999px;
+  padding: 1.2px;
+  background: conic-gradient(
+    from 0deg,
+    rgba(255, 214, 153, 0) 0deg,
+    rgba(255, 214, 153, 0.92) 24deg,
+    rgba(255, 242, 204, 0.9) 38deg,
+    rgba(255, 214, 153, 0) 64deg,
+    rgba(255, 214, 153, 0) 360deg
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: sparkle-ring 8s linear infinite;
+  opacity: 0.9;
+}
+
+@keyframes sparkle-ring {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Glass card hover effects */
+.glass-card-hover {
+  transition: transform 260ms ease, box-shadow 260ms ease, border-color 260ms ease;
+}
+
+.glass-card-hover:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 241, 225, 0.25);
+  box-shadow: 0 16px 40px rgba(59, 31, 26, 0.2);
+}
+
+.surface-scan-line {
+  background: linear-gradient(110deg, transparent 40%, rgba(255, 227, 190, 0.14) 50%, transparent 60%);
+  transform: translateX(-120%);
+  animation: surface-scan 9s linear infinite;
+}
+
+@keyframes surface-scan {
+  from { transform: translateX(-120%); }
+  to { transform: translateX(120%); }
+}
+
+/* Section shell variants */
+.section-shell-matte {
+  border: 1px solid rgba(255, 236, 214, 0.16);
+  background: linear-gradient(165deg, rgba(58, 32, 18, 0.74), rgba(20, 10, 6, 0.86));
+}
+
+.section-shell-crisp {
+  border: 1px solid rgba(255, 231, 203, 0.18);
+  background: linear-gradient(170deg, rgba(34, 18, 11, 0.9), rgba(23, 11, 7, 0.94));
+}

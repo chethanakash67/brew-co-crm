@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Store {
+  id        String     @id @default(cuid())
+  name      String
+  createdAt DateTime   @default(now()) @map("createdat")
+  customers Customer[]
+  orders    Order[]
+  segments  Segment[]
+  campaigns Campaign[]
+
+  @@map("stores")
+}
+
+model Customer {
+  id             String          @id @default(cuid())
+  storeId        String?         @map("storeid")
+  name           String
+  email          String
+  phone          String
+  city           String
+  tier           String
+  totalSpend     Float           @default(0) @map("totalspend")
+  createdAt      DateTime        @default(now()) @map("createdat")
+  store          Store?          @relation(fields: [storeId], references: [id])
+  orders         Order[]
+  communications Communication[]
+
+  @@unique([storeId, email])
+  @@index([city])
+  @@index([tier])
+  @@index([storeId])
+  @@map("customers")
+}
+
+model Order {
+  id         String   @id @default(cuid())
+  customerId String   @map("customerid")
+  storeId    String?  @map("storeid")
+  amount     Float
+  items      Json
+  channel    String
+  orderedAt  DateTime @map("orderedat")
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  store      Store?   @relation(fields: [storeId], references: [id])
+
+  @@index([customerId])
+  @@index([orderedAt])
+  @@index([storeId])
+  @@map("orders")
+}
+
+model Segment {
+  id          String     @id @default(cuid())
+  storeId     String?    @map("storeid")
+  name        String
+  description String
+  sqlQuery    String     @map("sqlquery")
+  createdAt   DateTime   @default(now()) @map("createdat")
+  store       Store?     @relation(fields: [storeId], references: [id])
+  campaigns   Campaign[]
+
+  @@index([storeId])
+  @@map("segments")
+}
+
+model Campaign {
+  id             String          @id @default(cuid())
+  storeId        String?         @map("storeid")
+  name           String
+  segmentId      String          @map("segmentid")
+  message        String
+  channel        String
+  status         String
+  createdAt      DateTime        @default(now()) @map("createdat")
+  segment        Segment         @relation(fields: [segmentId], references: [id])
+  store          Store?          @relation(fields: [storeId], references: [id])
+  communications Communication[]
+
+  @@index([segmentId])
+  @@index([status])
+  @@index([storeId])
+  @@map("campaigns")
+}
+
+model Communication {
+  id         String    @id @default(cuid())
+  campaignId String    @map("campaignid")
+  customerId String    @map("customerid")
+  message    String
+  channel    String
+  status     String
+  sentAt     DateTime? @map("sentat")
+  campaign   Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  customer   Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  receipts   Receipt[]
+
+  @@index([campaignId])
+  @@index([customerId])
+  @@index([status])
+  @@map("communications")
+}
+
+model Receipt {
+  id              String        @id @default(cuid())
+  communicationId String        @map("communicationid")
+  eventType       String        @map("eventtype")
+  timestamp       DateTime      @default(now())
+  communication   Communication @relation(fields: [communicationId], references: [id], onDelete: Cascade)
+
+  @@index([communicationId])
+  @@index([eventType])
+  @@map("receipts")
+}

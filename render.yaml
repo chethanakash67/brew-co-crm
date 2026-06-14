@@ -1,0 +1,44 @@
+services:
+  - type: pserv
+    name: brew-co-db
+    plan: free
+    databaseName: brewco
+    user: brewco
+
+  - type: web
+    name: brew-co-backend
+    plan: free
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npx prisma migrate deploy && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: brew-co-db
+          property: connectionString
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: CHANNEL_STUB_URL
+        value: https://brew-co-channel-stub.onrender.com
+      - key: FRONTEND_URL
+        value: https://brew-co.vercel.app
+      - key: PORT
+        value: 8000
+
+  - type: web
+    name: brew-co-channel-stub
+    plan: free
+    runtime: node
+    rootDir: channel-stub
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CRM_CALLBACK_URL
+        value: https://brew-co-backend.onrender.com/api/receipts/callback
+      - key: PORT
+        value: 3003
