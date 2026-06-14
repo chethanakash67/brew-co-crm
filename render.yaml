@@ -1,17 +1,17 @@
-services:
-  - type: pserv
-    name: brew-co-db
+databases:
+  - name: brew-co-db
     plan: free
     databaseName: brewco
     user: brewco
 
+services:
   - type: web
     name: brew-co-backend
     plan: free
     runtime: docker
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
-    dockerCommand: sh -c "npx prisma migrate deploy && npm start"
+    dockerCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
@@ -22,23 +22,25 @@ services:
       - key: GEMINI_API_KEY
         sync: false
       - key: CHANNEL_STUB_URL
-        value: https://brew-co-channel-stub.onrender.com
+        value: https://brew-co-channel-stub-5k6e.onrender.com
       - key: FRONTEND_URL
-        value: https://brew-co.vercel.app
+        value: https://brewco-crm.vercel.app
+      - key: FRONTEND_URLS
+        value: https://brewco-crm.vercel.app,https://brew-co-crm-chi.vercel.app
       - key: PORT
         value: 8000
 
   - type: web
     name: brew-co-channel-stub
     plan: free
-    runtime: node
-    rootDir: channel-stub
-    buildCommand: npm install && npm run build
-    startCommand: npm start
+    runtime: docker
+    dockerfilePath: ./channel-stub/Dockerfile
+    dockerContext: ./channel-stub
+    dockerCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
       - key: CRM_URL
-        value: https://brew-co-backend.onrender.com
+        value: https://brew-co-crm-xlin.onrender.com
       - key: PORT
         value: 3003

@@ -16,14 +16,52 @@ dotenv.config({ path: "backend/.env" });
 
 const app = express();
 const port = Number(process.env.PORT ?? 8000);
-const frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:3000";
 const localFrontendOrigin = /^http:\/\/(localhost|127\.0\.0\.1):30\d\d$/;
-const allowedOrigins = new Set([frontendUrl, "http://localhost:3000", "http://127.0.0.1:3000"]);
+
+function normalizeOrigin(value: string) {
+  try {
+    return new URL(value).origin;
+  } catch {
+    return value.replace(/\/$/, "");
+  }
+}
+
+const allowedOrigins = new Set(
+  [
+    process.env.FRONTEND_URL,
+    ...(process.env.FRONTEND_URLS?.split(",") ?? []),
+    "http://localhost:3000",
+    "http://127.0.0.1:3000"
+  ]
+    .filter((value): value is string => Boolean(value?.trim()))
+    .map((value) => normalizeOrigin(value.trim()))
+);
+
+function isVercelFrontendOrigin(origin: string) {
+  try {
+    const { hostname, protocol } = new URL(origin);
+    if (protocol !== "https:") return false;
+    return (
+      hostname === "brewco-crm.vercel.app" ||
+      hostname === "brew-co-crm-chi.vercel.app" ||
+      (hostname.startsWith("brew-co-crm-") && hostname.endsWith(".vercel.app")) ||
+      (hostname.startsWith("brew-co-") && hostname.endsWith("-chethanakash67s-projects.vercel.app"))
+    );
+  } catch {
+    return false;
+  }
+}
 
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || allowedOrigins.has(origin) || localFrontendOrigin.test(origin)) {
+      const normalizedOrigin = origin ? normalizeOrigin(origin) : undefined;
+      if (
+        !normalizedOrigin ||
+        allowedOrigins.has(normalizedOrigin) ||
+        localFrontendOrigin.test(normalizedOrigin) ||
+        isVercelFrontendOrigin(normalizedOrigin)
+      ) {
         callback(null, true);
         return;
       }
